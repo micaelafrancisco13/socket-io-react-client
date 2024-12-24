@@ -12,9 +12,7 @@ function Geolocation() {
 	// State to track error messages
 	const [errorMessage, setErrorMessage] = useState<string | null>(null)
 	// State to track permission status
-	const [permissionStatus, setPermissionStatus] = useState<
-		"granted" | "denied" | "prompt" | null
-	>(null)
+	const [permissionStatus, setPermissionStatus] = useState<"granted" | "denied" | "prompt" | null>(null)
 	// Socket.IO instance
 	const [socket, setSocket] = useState<Socket | null>(null)
 	// State to track if tracking is active
@@ -36,19 +34,13 @@ function Geolocation() {
 				},
 				(error) => {
 					if (error.code === 1) {
-						setErrorMessage(
-							"Location access is blocked. Please allow location access to use this feature.",
-						)
+						setErrorMessage("Location access is blocked. Please allow location access to use this feature.")
 					} else if (error.code === 2) {
 						setErrorMessage("Location information is unavailable.")
 					} else if (error.code === 3) {
-						setErrorMessage(
-							"The request to get location timed out.",
-						)
+						setErrorMessage("The request to get location timed out.")
 					} else {
-						setErrorMessage(
-							"An unknown error occurred while fetching location.",
-						)
+						setErrorMessage("An unknown error occurred while fetching location.")
 					}
 					setUserLocation(null)
 				},
@@ -94,10 +86,7 @@ function Geolocation() {
 					}
 				})
 				.catch((exception) => {
-					console.error(
-						"Error checking permission status:",
-						exception,
-					)
+					console.error("Error checking permission status:", exception)
 				})
 		}
 	}
@@ -134,13 +123,9 @@ function Geolocation() {
 			<h1>Geolocation App</h1>
 			{/* Button to start or stop location tracking */}
 			{!isTracking ? (
-				<button onClick={startLocationTracking}>
-					Start Location Tracking
-				</button>
+				<button onClick={startLocationTracking}>Start Location Tracking</button>
 			) : (
-				<button onClick={stopLocationTracking}>
-					Stop Location Tracking
-				</button>
+				<button onClick={stopLocationTracking}>Stop Location Tracking</button>
 			)}
 			{/* Display user's location if available */}
 			{userLocation && (
@@ -160,11 +145,7 @@ function Geolocation() {
 			{/* Display current permission status */}
 			<div>
 				<h2>Permission Status</h2>
-				<p>
-					{permissionStatus
-						? `Permission: ${permissionStatus}`
-						: "Checking permissions..."}
-				</p>
+				<p>{permissionStatus ? `Permission: ${permissionStatus}` : "Checking permissions..."}</p>
 			</div>
 		</div>
 	)
