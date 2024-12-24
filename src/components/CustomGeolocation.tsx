@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react"
-import { io, Socket } from "socket.io-client"
+import useWebsocket from "../hooks/useWebsocket.tsx"
 
 interface Location {
 	latitude: number
 	longitude: number
+}
+
+type ServerToClientEvents = {
+	"receive-updated-location": (location: Location) => void
+}
+
+type ClientToServerEvents = {
+	"send-updated-location": (location: Location) => void
 }
 
 function Geolocation() {
@@ -14,7 +22,7 @@ function Geolocation() {
 	// State to track permission status
 	const [permissionStatus, setPermissionStatus] = useState<"granted" | "denied" | "prompt" | null>(null)
 	// Socket.IO instance
-	const [socket, setSocket] = useState<Socket | null>(null)
+	const socket = useWebsocket<ServerToClientEvents, ClientToServerEvents>()
 	// State to track if tracking is active
 	const [isTracking, setIsTracking] = useState<boolean>(false)
 	// Reference to the Geolocation watcher
@@ -30,7 +38,7 @@ function Geolocation() {
 					setErrorMessage(null)
 
 					// Send updated location to the server via Socket.IO
-					socket?.emit("updateLocation", { latitude, longitude })
+					socket?.emit("send-updated-location", { latitude, longitude })
 				},
 				(error) => {
 					if (error.code === 1) {
@@ -91,17 +99,6 @@ function Geolocation() {
 		}
 	}
 
-	// Establish Socket.IO connection on component mount
-	useEffect(() => {
-		const socketInstance = io("http://localhost:3000") // Replace with your backend URL
-		setSocket(socketInstance)
-
-		// Clean up socket connection on unmount
-		return () => {
-			socketInstance.disconnect()
-		}
-	}, [])
-
 	// Effect to check the permission status on component mount
 	useEffect(() => {
 		checkPermissionStatus()
@@ -110,7 +107,7 @@ function Geolocation() {
 	// Listen for updates from the server
 	useEffect(() => {
 		if (socket) {
-			socket.on("vehicleLocationUpdate", (data) => {
+			socket.on("receive-updated-location", (data) => {
 				console.log("Vehicle location update received:", data)
 				// Add logic to update the map or UI with this data
 			})
@@ -135,7 +132,7 @@ function Geolocation() {
 					<p>Longitude: {userLocation.longitude}</p>
 				</div>
 			)}
-			{/* Display error message if any */}
+			{/* Display an error message if any */}
 			{errorMessage && (
 				<div>
 					<h2>Error</h2>
