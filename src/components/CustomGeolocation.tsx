@@ -26,12 +26,11 @@ function Geolocation() {
 	// State to track if tracking is active
 	const [isTracking, setIsTracking] = useState<boolean>(false)
 	// Reference to the Geolocation watcher
-	let watchId: number | null = null
 
 	// Function to start periodic location tracking
 	const startLocationTracking = () => {
 		if (navigator.geolocation) {
-			watchId = navigator.geolocation.watchPosition(
+			navigator.geolocation.watchPosition(
 				(position) => {
 					const { latitude, longitude } = position.coords
 					setUserLocation({ latitude, longitude })
@@ -66,37 +65,31 @@ function Geolocation() {
 
 	// Function to stop location tracking
 	const stopLocationTracking = () => {
-		if (watchId !== null && navigator.geolocation) {
-			navigator.geolocation.clearWatch(watchId)
-			watchId = null
-			setIsTracking(false)
-		}
+		setIsTracking(false)
 	}
 
 	// Function to check permission status using Permissions API
 	const checkPermissionStatus = () => {
-		if (navigator.permissions) {
-			navigator.permissions
-				.query({
-					name: "geolocation",
-				})
-				.then((result) => {
+		navigator?.permissions
+			.query({
+				name: "geolocation",
+			})
+			.then((result) => {
+				setPermissionStatus(result.state)
+
+				// Listen for changes to the permission state
+				result.onchange = () => {
 					setPermissionStatus(result.state)
 
-					// Listen for changes to the permission state
-					result.onchange = () => {
-						setPermissionStatus(result.state)
-
-						// Reload or reattempt location retrieval if permission changes to "granted"
-						if (result.state !== permissionStatus) {
-							location.reload()
-						}
+					// Reload or reattempt location retrieval if permission changes to "granted"
+					if (result.state !== permissionStatus) {
+						location.reload()
 					}
-				})
-				.catch((exception) => {
-					console.error("Error checking permission status:", exception)
-				})
-		}
+				}
+			})
+			.catch((exception) => {
+				console.error("Error checking permission status:", exception)
+			})
 	}
 
 	// Effect to check the permission status on component mount
@@ -108,7 +101,7 @@ function Geolocation() {
 	useEffect(() => {
 		if (socket) {
 			socket.on("receive-updated-location", (data) => {
-				console.log("Vehicle location update received:", data)
+				// console.log("Vehicle location update received:", data)
 				// Add logic to update the map or UI with this data
 			})
 		}
